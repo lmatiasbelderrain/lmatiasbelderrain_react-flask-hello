@@ -29,13 +29,37 @@ def handle_hello():
 # create_access_token() function is used to actually generate the JWT.
 @api.route("/login", methods=["POST"])
 def login():
-    username = request.json.get("username", None)
+    email= request.json.get("email", None)
     password = request.json.get("password", None)
-    if username != "test" or password != "test":
-        return jsonify({"msg": "Bad username or password"}), 401
+    user = User.query.filter_by(email=email).first()
+    if user is None:
+        return jsonify({"msg": "Bad email"}), 404
 
-    access_token = create_access_token(identity=username)
-    return jsonify(access_token=access_token)
+    if email != user.email or password != user.password:
+        return jsonify({"msg": "Bad email or password"}), 401
+
+    access_token = create_access_token(identity=email)
+    response_body={
+        "access_token": access_token,
+        "user": user.serialize()
+    }
+    return jsonify(response_body), 200
+
+@api.route("/register", methods=["POST"])
+def register():
+    email= request.json.get("email", None)
+    password = request.json.get("password", None)
+    user = User.query.filter_by(email=email).first()
+    if user is None:
+        new_user= User(
+            email=email,
+            password=password,
+            is_active=True
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify(new_user.serialize()), 201
+    return jsonify({"msg": "ya existe el usuario"}), 400
 
 
 # Protect a route with jwt_required, which will kick out requests
