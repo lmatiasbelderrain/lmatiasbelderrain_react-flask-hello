@@ -14,6 +14,7 @@ export const initialStore = () => {
       },
     ],
     profile: {},
+    token: "",
   };
 };
 
@@ -37,7 +38,13 @@ export default function storeReducer(store, action = {}) {
     case "profile":
       return {
         ...store,
-        profile: action.payload,
+        profile: action.payload.user,
+        token: action.payload.access_token,
+      };
+    case "logout":
+      return {
+        ...store,
+        token: action.payload,
       };
     default:
       throw Error("Unknown action.");
@@ -59,8 +66,37 @@ export const login = async (usuario, dispatch) => {
       localStorage.setItem("token", data.access_token);
       dispatch({
         type: "profile",
-        payload: data.user,
+        payload: data,
       });
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const logout = (dispatch) => {
+  let token = localStorage.removeItem("token");
+
+  dispatch({
+    type: "logout",
+    payload: undefined,
+  });
+};
+
+export const registro = async (usuario, dispatch) => {
+  try {
+    const response = await fetch(
+      "https://psychic-halibut-v6rq94w4xqxg2xwqw-3001.app.github.dev/api/register",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(usuario),
+      }
+    );
+    if (response.status == 201) {
       return true;
     } else {
       return false;

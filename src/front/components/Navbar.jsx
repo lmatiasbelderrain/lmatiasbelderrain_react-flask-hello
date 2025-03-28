@@ -1,14 +1,25 @@
 import { Link } from "react-router-dom";
+import { logout } from "../store";
+import { useEffect } from "react";
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+
 
 export const Navbar = () => {
-	let token = localStorage.getItem("token")
+	const { store, dispatch } = useGlobalReducer()
+	let token = store.token
+
+
+
+	useEffect(() => {
+		console.log("hola")
+	}, [token])
 	return (
 		<nav className="navbar navbar-light bg-light">
 			<div className="container">
-				<Link to="/">
-					<span className="navbar-brand mb-0 h1">React Boilerplate</span>
+				<Link to="/" style={{ textDecoration: "none" }}>
+					<span className="navbar-brand mb-0 h1">🏚️</span>
 				</Link>
-				{token=="" ?
+				{token == null ?
 					<div className="ml-auto">
 						<Link to="/demo">
 							<button className="btn btn-primary mx-2">Iniciar session</button>
@@ -19,8 +30,9 @@ export const Navbar = () => {
 					</div>
 					:
 					<Link to="/">
-							<button className="btn btn-primary">cerrar sesion</button>
-						</Link>
+						<button className="btn btn-primary" onClick={() => logout(dispatch)}>cerrar sesion</button>
+					</Link>
+
 				}
 			</div>
 
